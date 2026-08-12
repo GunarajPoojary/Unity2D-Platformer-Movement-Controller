@@ -13,26 +13,34 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private Vector2 _groundCheckSize = new Vector2(0.5f, 0.1f);
     [SerializeField] private LayerMask _groundLayer;
 
-
     private Rigidbody2D _rb;
+    private float _gravity;
+    private float _initialJumpVelocity; // velocity required to reach jump apex
     private PlayerInput _input;
 
-    private float _moveSpeed;
     private bool _isGrounded;
-
-
     private float _verticalVelocity;
     private float _horizontalVelocity;
-
-
-    private float _initialVerticalVelocity;
-    private float _gravity;
-    private float _timeTillPeakVerticalVel;
 
     private void Awake()
     {
         _input = GetComponent<PlayerInput>();
         _rb = GetComponent<Rigidbody2D>();
+
+        /*position equation p(t) = p0 + v0*t + (1/2)*g*t^2
+          We only care about height gained, so set p0 = 0
+          then eq becomes h(t) = v0*t + (1/2)*g*t^2
+          At the apex (t = timeTillJumpApex), vertical velocity is 0: 
+          after differentiating we get v(t) = v0 + g*t = 0 v(t) velocity at apex is zero then v0 = -g*t
+          Substituting v0 = -g*t into h(t) eliminates the v0*t term: h = -g*t^2 + (1/2)*g*t^2 = -(1/2)*g*t^2
+          then g = -2h / t^2
+        */
+        _gravity = -(2f * _movementStats.jumpHeight) / Mathf.Pow(_movementStats.timeTillJumpApex, 2);
+
+        /* From v = g * t: the launch speed needed to reach 0 velocity (the apex)
+          after timeTillJumpApex seconds under that gravity
+        */
+        _initialJumpVelocity = Mathf.Abs(_gravity) * _movementStats.timeTillJumpApex;
     }
 
     private void OnEnable()
@@ -47,17 +55,6 @@ public class PlayerMovement : MonoBehaviour
         _input.OnJumpCanceled -= HandleJumpCanceled;
     }
 
-    private void Start()
-    {
-        _gravity = -(2f * _movementStats.jumpHeight) / Mathf.Pow(_timeTillPeakVerticalVel, 2f);
-        _initialVerticalVelocity = Mathf.Abs(_gravity) * _timeTillPeakVerticalVel;
-    }
-
-    private void Update()
-    {
-        ReadInputs();
-    }
-
     private void FixedUpdate()
     {
         CheckGrounded();
@@ -65,12 +62,6 @@ public class PlayerMovement : MonoBehaviour
         HandleMovement();
         ApplyMovement();
     }
-
-    private void ReadInputs()
-    {
-        _moveSpeed = _movementStats.maxSpeed;
-    }
-
 
     private void CheckGrounded()
     {
@@ -98,7 +89,7 @@ public class PlayerMovement : MonoBehaviour
             speedChange = _isGrounded ? _movementStats.groundDecceleration : _movementStats.airDeceleration;
         }
 
-        // Mathf.MoveTowards makes it use constant speedchange
+        // Mathf.MoveTowards uses constant speedchange
         _horizontalVelocity = Mathf.MoveTowards(_horizontalVelocity, targetSpeed, speedChange * Time.fixedDeltaTime);
     }
 
@@ -107,15 +98,17 @@ public class PlayerMovement : MonoBehaviour
         _rb.linearVelocity = new Vector2(_horizontalVelocity, _verticalVelocity);
     }
 
+    private void HandleJumpPerformed()
+    {
+        if (!_isGrounded) return;
+
+        _verticalVelocity = _initialJumpVelocity;
+    }
 
     private void HandleJump()
     {
-
-    }
-
-    private void HandleJumpPerformed()
-    {
-
+        if (!_isGrounded)
+            _verticalVelocity += _gravity * Time.fixedDeltaTime;
     }
 
     private void HandleJumpCanceled()
