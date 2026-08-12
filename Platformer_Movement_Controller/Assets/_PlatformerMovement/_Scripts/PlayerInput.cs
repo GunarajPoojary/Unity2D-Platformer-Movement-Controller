@@ -7,7 +7,6 @@ public class PlayerInput : MonoBehaviour
     // Make sure to use project wide input action
     [SerializeField] private InputActionReference _moveAction;
     [SerializeField] private InputActionReference _jumpAction;
-    [SerializeField] private InputActionReference _runAction;
 
     private Vector2 _moveInput;
     private bool _shouldRun;
@@ -29,17 +28,21 @@ public class PlayerInput : MonoBehaviour
     }
 
     public Action OnJumpPerformed;
+    public Action OnJumpCanceled;
 
 
     private void Update()
     {
         _moveInput = _moveAction.action.ReadValue<Vector2>();
 
-        _shouldRun = _runAction.action.IsPressed();
-
         if (_jumpAction.action.WasPerformedThisFrame())
         {
             OnJumpPerformed?.Invoke();
+        }
+
+        if (_jumpAction.action.WasReleasedThisFrame())
+        {
+            OnJumpCanceled?.Invoke();
         }
     }
 }
