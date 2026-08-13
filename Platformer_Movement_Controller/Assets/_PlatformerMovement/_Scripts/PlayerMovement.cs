@@ -36,6 +36,7 @@ public class PlayerMovement : MonoBehaviour
 
     private bool _isGrounded;
     private float _verticalVelocity;
+    private float _jumpBufferCounter;
     private float _horizontalVelocity;
 
     private void Awake()
@@ -90,8 +91,27 @@ public class PlayerMovement : MonoBehaviour
     {
         CheckGrounded();
         ApplyGravity();
+        JumpInputBuffer();
         HandleMovement();
         ApplyMovement();
+    }
+
+    private void JumpInputBuffer()
+    {
+        // Jump input pressed countdown each frame
+        _jumpBufferCounter -= Time.fixedDeltaTime;
+
+        // Perform jump if the countdown/buffer counter hasn't reached zero and player hit the ground 
+        if (_isGrounded && _jumpBufferCounter > 0f)
+        {
+            ExecuteJump();
+            _jumpBufferCounter = 0f;
+        }
+    }
+
+    private void ExecuteJump()
+    {
+        _verticalVelocity = _initialJumpVelocity;
     }
 
     private void CheckGrounded()
@@ -136,9 +156,8 @@ public class PlayerMovement : MonoBehaviour
 
     private void HandleJumpPerformed()
     {
-        if (!_isGrounded) return;
-
-        _verticalVelocity = _initialJumpVelocity;
+        // Reset the jump input buffer
+        _jumpBufferCounter = _movementStats.JumpBufferTime;
     }
 
     private void HandleJumpCanceled()

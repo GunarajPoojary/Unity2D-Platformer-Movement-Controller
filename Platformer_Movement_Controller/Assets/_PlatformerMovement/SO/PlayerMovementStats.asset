@@ -17,8 +17,9 @@ MonoBehaviour:
   <TurnSpeed>k__BackingField: 80
   <GroundAcceleration>k__BackingField: 52
   <GroundDecceleration>k__BackingField: 52
-  AirAcceleration: 1
-  AirDeceleration: 1
+  AirAcceleration: 53.3
+  AirDeceleration: 53.3
   <JumpHeight>k__BackingField: 4
   <TimeTillJumpApex>k__BackingField: 0.4
   <JumpCutMultiplier>k__BackingField: 0.5
+  <JumpBufferTime>k__BackingField: 0.397
