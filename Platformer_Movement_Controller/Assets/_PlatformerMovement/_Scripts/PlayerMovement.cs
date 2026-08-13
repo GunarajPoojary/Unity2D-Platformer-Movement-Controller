@@ -33,7 +33,7 @@ public class PlayerMovement : MonoBehaviour
     private float _gravity;
     private float _initialJumpVelocity; // velocity required to reach jump apex
     private PlayerInput _input;
-
+    private int _jumpsRemaining;
     private bool _isGrounded;
     private float _verticalVelocity;
     private float _jumpBufferCounter;
@@ -112,16 +112,26 @@ public class PlayerMovement : MonoBehaviour
     private void ExecuteJump()
     {
         _verticalVelocity = _initialJumpVelocity;
+        _jumpsRemaining++;
     }
 
     private void CheckGrounded()
     {
-        _isGrounded = Physics2D.BoxCast(_groundCheckPoint.position,
-                                        _groundCheckSize,
-                                        0f,
-                                        Vector2.down,
-                                        _groundCheckDistance,
-                                        _groundLayer);
+        bool wasGrounded = _isGrounded;
+
+        _isGrounded = Physics2D.BoxCast(
+            _groundCheckPoint.position,
+            _groundCheckSize,
+            0f,
+            Vector2.down,
+            _groundCheckDistance,
+            _groundLayer);
+
+        // Reset jumps when we land
+        if (_isGrounded && !wasGrounded)
+        {
+            _jumpsRemaining = 0;
+        }
     }
 
 
@@ -156,8 +166,17 @@ public class PlayerMovement : MonoBehaviour
 
     private void HandleJumpPerformed()
     {
-        // Reset the jump input buffer
-        _jumpBufferCounter = _movementStats.JumpBufferTime;
+        if (_isGrounded)
+        {
+            _jumpBufferCounter = _movementStats.JumpBufferTime;
+            return;
+        }
+
+        // air jump
+        if (_jumpsRemaining < _movementStats.MaxJumps)
+        {
+            ExecuteJump();
+        }
     }
 
     private void HandleJumpCanceled()
