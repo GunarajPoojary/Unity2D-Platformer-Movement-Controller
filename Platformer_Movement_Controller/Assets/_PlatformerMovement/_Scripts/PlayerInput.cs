@@ -1,15 +1,9 @@
 using System;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 public class PlayerInput : MonoBehaviour
 {
-    // Make sure to use project wide input action
-    [SerializeField] private InputActionReference _moveAction;
-    [SerializeField] private InputActionReference _jumpAction;
-
     private Vector2 _moveInput;
-    private bool _shouldRun;
 
     public Vector2 MoveInput
     {
@@ -19,28 +13,19 @@ public class PlayerInput : MonoBehaviour
         }
     }
 
-    public bool ShouldRun
-    {
-        get
-        {
-            return _shouldRun;
-        }
-    }
-
     public Action OnJumpPerformed;
     public Action OnJumpCanceled;
 
-
     private void Update()
     {
-        _moveInput = _moveAction.action.ReadValue<Vector2>();
+        _moveInput = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
 
-        if (_jumpAction.action.WasPerformedThisFrame())
+        if (Input.GetButtonDown("Jump"))
         {
             OnJumpPerformed?.Invoke();
         }
 
-        if (_jumpAction.action.WasReleasedThisFrame())
+        if (Input.GetButtonUp("Jump"))
         {
             OnJumpCanceled?.Invoke();
         }

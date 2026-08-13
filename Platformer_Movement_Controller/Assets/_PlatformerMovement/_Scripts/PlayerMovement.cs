@@ -1,10 +1,12 @@
 using System;
+using TMPro;
 using UnityEngine;
 
 [RequireComponent(typeof(PlayerInput), typeof(Rigidbody2D))]
 public class PlayerMovement : MonoBehaviour
 {
     private const float MOVEMENT_THRESHOLD = 0.01f;
+
     [SerializeField] private PlayerMovementStats _movementStats;
     [SerializeField] private float _groundCheckDistance;
 
@@ -12,6 +14,14 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private Transform _groundCheckPoint;
     [SerializeField] private Vector2 _groundCheckSize = new Vector2(0.5f, 0.1f);
     [SerializeField] private LayerMask _groundLayer;
+
+#if UNITY_EDITOR
+    [Header("Debugging")]
+    [SerializeField] private TMP_Text _gravityLabel;
+    [SerializeField] private TMP_Text _initialJumpVelLabel;
+    [SerializeField] private TMP_Text _verticalVelLabel;
+    [SerializeField] private TMP_Text _horizontalVelLabel;
+#endif
 
     private Rigidbody2D _rb;
     private float _gravity;
@@ -54,6 +64,16 @@ public class PlayerMovement : MonoBehaviour
         _input.OnJumpPerformed -= HandleJumpPerformed;
         _input.OnJumpCanceled -= HandleJumpCanceled;
     }
+
+#if UNITY_EDITOR
+    private void Update()
+    {
+        _gravityLabel.text = "Gravity: " + _gravity.ToString();
+        _initialJumpVelLabel.text = "Initial Jump Velocity: " + _initialJumpVelocity.ToString();
+        _verticalVelLabel.text = "Vertical Velocity: " + _verticalVelocity.ToString();
+        _horizontalVelLabel.text = "Horizontal Velocity: " + _horizontalVelocity.ToString();
+    }
+#endif
 
     private void FixedUpdate()
     {
