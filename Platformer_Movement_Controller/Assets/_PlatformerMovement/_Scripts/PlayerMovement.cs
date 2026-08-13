@@ -6,7 +6,7 @@ using UnityEngine;
 public class PlayerMovement : MonoBehaviour
 {
     private const float MOVEMENT_THRESHOLD = 0.01f;
-    [SerializeField] private PlayerMovementStats _movementStats;
+    [SerializeField] private PlayerMovementDataSO _movementStats;
     [SerializeField] private float _groundCheckDistance;
 
     [Header("Ground Check")]
@@ -43,20 +43,25 @@ public class PlayerMovement : MonoBehaviour
         _input = GetComponent<PlayerInput>();
         _rb = GetComponent<Rigidbody2D>();
 
+        SetupVariables();
+    }
+
+    private void SetupVariables()
+    {
         /*position equation p(t) = p0 + v0*t + (1/2)*g*t^2
-          We only care about height gained, so set p0 = 0
-          then eq becomes h(t) = v0*t + (1/2)*g*t^2
-          At the apex (t = timeTillJumpApex), vertical velocity is 0: 
-          after differentiating we get v(t) = v0 + g*t = 0 v(t) velocity at apex is zero then v0 = -g*t
-          Substituting v0 = -g*t into h(t) eliminates the v0*t term: h = -g*t^2 + (1/2)*g*t^2 = -(1/2)*g*t^2
-          then g = -2h / t^2
-        */
-        _gravity = -(2f * _movementStats.jumpHeight) / Mathf.Pow(_movementStats.timeTillJumpApex, 2);
+                  We only care about height gained, so set p0 = 0
+                  then eq becomes h(t) = v0*t + (1/2)*g*t^2
+                  At the apex (t = timeTillJumpApex), vertical velocity is 0: 
+                  after differentiating we get v(t) = v0 + g*t = 0 v(t) velocity at apex is zero then v0 = -g*t
+                  Substituting v0 = -g*t into h(t) eliminates the v0*t term: h = -g*t^2 + (1/2)*g*t^2 = -(1/2)*g*t^2
+                  then g = -2h / t^2
+                */
+        _gravity = -(2f * _movementStats.JumpHeight) / Mathf.Pow(_movementStats.TimeTillJumpApex, 2) * _movementStats.GravityMuliplier;
 
         /* From v = g * t: the launch speed needed to reach 0 velocity (the apex)
           after timeTillJumpApex seconds under that gravity
         */
-        _initialJumpVelocity = Mathf.Abs(_gravity) * _movementStats.timeTillJumpApex;
+        _initialJumpVelocity = Mathf.Abs(_gravity) * _movementStats.TimeTillJumpApex;
     }
 
     private void OnEnable()
@@ -84,7 +89,7 @@ public class PlayerMovement : MonoBehaviour
     private void FixedUpdate()
     {
         CheckGrounded();
-        HandleJump();
+        ApplyGravity();
         HandleMovement();
         ApplyMovement();
     }
@@ -104,20 +109,20 @@ public class PlayerMovement : MonoBehaviour
     private void HandleMovement()
     {
         // The target speed will be max speed when we press input otherwise it will be zero
-        float targetSpeed = _input.MoveInput.x * _movementStats.maxSpeed;
+        float targetSpeed = _input.MoveInput.x * _movementStats.MaxSpeed;
         float speedChange;
 
         if (Mathf.Abs(targetSpeed) > MOVEMENT_THRESHOLD)
         {
             // If the sign (i.e. positive or negative) of our input direction doesn't match our movement, it means we're turning around
             if (Mathf.Sign(targetSpeed) != Mathf.Sign(_horizontalVelocity))
-                speedChange = _movementStats.turnSpeed;
+                speedChange = _movementStats.TurnSpeed;
             else
-                speedChange = _isGrounded ? _movementStats.groundAcceleration : _movementStats.airAcceleration;
+                speedChange = _isGrounded ? _movementStats.GroundAcceleration : _movementStats.AirAcceleration;
         }
         else
         {
-            speedChange = _isGrounded ? _movementStats.groundDecceleration : _movementStats.airDeceleration;
+            speedChange = _isGrounded ? _movementStats.GroundDecceleration : _movementStats.AirDeceleration;
         }
 
         // Mathf.MoveTowards uses constant speedchange
@@ -136,15 +141,18 @@ public class PlayerMovement : MonoBehaviour
         _verticalVelocity = _initialJumpVelocity;
     }
 
-    private void HandleJump()
+    private void HandleJumpCanceled()
+    {
+        if (_rb.linearVelocityY > 0)
+        {
+            _verticalVelocity *= _movementStats.JumpCutMultiplier;
+        }
+    }
+
+    private void ApplyGravity()
     {
         if (!_isGrounded)
             _verticalVelocity += _gravity * Time.fixedDeltaTime;
-    }
-
-    private void HandleJumpCanceled()
-    {
-
     }
 
 #if UNITY_EDITOR
