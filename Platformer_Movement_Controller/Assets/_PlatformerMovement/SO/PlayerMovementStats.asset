@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: PlayerMovementStats
   m_EditorClassIdentifier: 
   <MaxSpeed>k__BackingField: 10
-  <GravityMuliplier>k__BackingField: 1
+  <GravityMuliplier>k__BackingField: 1.2
   <TurnSpeed>k__BackingField: 80
   <GroundAcceleration>k__BackingField: 52
   <GroundDecceleration>k__BackingField: 52
@@ -22,4 +22,4 @@ MonoBehaviour:
   <JumpHeight>k__BackingField: 4
   <TimeTillJumpApex>k__BackingField: 0.4
   <JumpCutMultiplier>k__BackingField: 0.5
-  <JumpBufferTime>k__BackingField: 0.397
+  <JumpBufferTime>k__BackingField: 0.15

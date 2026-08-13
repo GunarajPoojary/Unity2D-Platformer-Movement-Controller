@@ -18,4 +18,5 @@ public class PlayerMovementDataSO : ScriptableObject
     [field: SerializeField, Range(0.1f, 2f)] public float TimeTillJumpApex { get; private set; } = 0.4f;
     [field: SerializeField, Range(0, 1)] public float JumpCutMultiplier { get; private set; } = 0.5f;
     [field: SerializeField, Range(0.1f, 1f)] public float JumpBufferTime { get; private set; } = 0.15f;
+    [field: SerializeField, Range(0.1f, 1f)] public float GroundedVerticalVelocity { get; internal set; } = 0.1f;
 }

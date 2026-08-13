@@ -1259,7 +1259,7 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0, y: -0.41277772}
+  m_Offset: {x: 0, y: -0.412}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0, y: 0}
@@ -1269,7 +1269,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 0.75, y: 0.175}
+  m_Size: {x: 0.46, y: 0.175}
   m_EdgeRadius: 0
 --- !u!1 &1434995269
 GameObject:
@@ -1881,8 +1881,8 @@ CapsuleCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0.08139529}
-  m_Size: {x: 1, y: 0.8272093}
+  m_Offset: {x: 0, y: 0.08}
+  m_Size: {x: 0.86, y: 0.82}
   m_Direction: 0
 --- !u!1 &1694924132
 GameObject:
@@ -1963,7 +1963,7 @@ MonoBehaviour:
   _movementStats: {fileID: 11400000, guid: 3f15569da722f75498a66dbd1e627823, type: 2}
   _groundCheckDistance: 0.01
   _groundCheckPoint: {fileID: 731914343}
-  _groundCheckSize: {x: 1, y: 0.04}
+  _groundCheckSize: {x: 0.46, y: 0.04}
   _groundLayer:
     serializedVersion: 2
     m_Bits: 64

@@ -170,8 +170,13 @@ public class PlayerMovement : MonoBehaviour
 
     private void ApplyGravity()
     {
-        if (!_isGrounded)
-            _verticalVelocity += _gravity * Time.fixedDeltaTime;
+        if (_isGrounded)
+        {
+            _verticalVelocity = -_movementStats.GroundedVerticalVelocity;
+            return;
+        }
+
+        _verticalVelocity += _gravity * Time.fixedDeltaTime;
     }
 
 #if UNITY_EDITOR
