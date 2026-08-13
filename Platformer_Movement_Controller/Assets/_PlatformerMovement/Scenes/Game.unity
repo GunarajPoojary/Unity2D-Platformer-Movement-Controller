@@ -502,7 +502,7 @@ Transform:
   m_GameObject: {fileID: 731914342}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -0.48, z: 0}
+  m_LocalPosition: {x: 0, y: -0.5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -627,25 +627,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 01614664b831546d2ae94a42149d80ac, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_SendPointerHoverToParent: 1
-  m_MoveRepeatDelay: 0.5
-  m_MoveRepeatRate: 0.1
-  m_XRTrackingOrigin: {fileID: 0}
-  m_ActionsAsset: {fileID: -944628639613478452, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
-  m_PointAction: {fileID: -1654692200621890270, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
-  m_MoveAction: {fileID: -8784545083839296357, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
-  m_SubmitAction: {fileID: 392368643174621059, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
-  m_CancelAction: {fileID: 7727032971491509709, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
-  m_LeftClickAction: {fileID: 3001919216989983466, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
-  m_MiddleClickAction: {fileID: -2185481485913320682, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
-  m_RightClickAction: {fileID: -4090225696740746782, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
-  m_ScrollWheelAction: {fileID: 6240969308177333660, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
-  m_TrackedDevicePositionAction: {fileID: 6564999863303420839, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
-  m_TrackedDeviceOrientationAction: {fileID: 7970375526676320489, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
-  m_DeselectOnBackgroundClick: 1
-  m_PointerBehavior: 0
-  m_CursorLockBehavior: 0
-  m_ScrollDeltaPerTick: 6
 --- !u!114 &1068262499
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1318,19 +1299,23 @@ MonoBehaviour:
     airDeceleration: 20
     jumpHeight: 5
     timeTillJumpApex: 0.4
-    groundedGravity: 0.001
-    jumpCutMultiplier: 0.5
-    maxFallSpeed: 20
   _groundCheckDistance: 0.1
   _groundCheckPoint: {fileID: 731914343}
-  _groundCheckSize: {x: 0.5, y: 0.1}
+  _groundCheckSize: {x: 0.86, y: -0.1}
   _groundLayer:
     serializedVersion: 2
     m_Bits: 64
+  _toggleGizmos: 1
   _gravityLabel: {fileID: 1610483171}
   _initialJumpVelLabel: {fileID: 704925362}
   _verticalVelLabel: {fileID: 1985459065}
   _horizontalVelLabel: {fileID: 2027528893}
+  _lineThickness: 5
+  _verticalArrowColor: {r: 0, g: 1, b: 0, a: 1}
+  _horizontalArrowColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  _arrowWidth: 0.5
+  _arrowHeight: 1
+  _offset: {x: 0, y: -0.79, z: 0}
 --- !u!114 &1694924138
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1343,8 +1328,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8e2f59b8533e6cd4b8d17c1515d2010a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _moveAction: {fileID: 403652517986015643, guid: c6f0b74f3da3e244b8d9c263dfa1c24e, type: 3}
-  _jumpAction: {fileID: 5571418035103753020, guid: c6f0b74f3da3e244b8d9c263dfa1c24e, type: 3}
 --- !u!1 &1985459063
 GameObject:
   m_ObjectHideFlags: 0

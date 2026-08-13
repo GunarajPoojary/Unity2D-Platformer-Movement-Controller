@@ -6,7 +6,6 @@ using UnityEngine;
 public class PlayerMovement : MonoBehaviour
 {
     private const float MOVEMENT_THRESHOLD = 0.01f;
-
     [SerializeField] private PlayerMovementStats _movementStats;
     [SerializeField] private float _groundCheckDistance;
 
@@ -17,10 +16,17 @@ public class PlayerMovement : MonoBehaviour
 
 #if UNITY_EDITOR
     [Header("Debugging")]
+    [SerializeField] private bool _toggleGizmos;
     [SerializeField] private TMP_Text _gravityLabel;
     [SerializeField] private TMP_Text _initialJumpVelLabel;
     [SerializeField] private TMP_Text _verticalVelLabel;
     [SerializeField] private TMP_Text _horizontalVelLabel;
+    [SerializeField] private float _lineThickness = 5f;
+    [SerializeField] private Color _verticalArrowColor = Color.green;
+    [SerializeField] private Color _horizontalArrowColor = Color.yellow;
+    [SerializeField] private float _arrowWidth = 10f;
+    [SerializeField] private float _arrowHeight = 10f;
+    [SerializeField] private Vector3 _offset = Vector2.down;
 #endif
 
     private Rigidbody2D _rb;
@@ -85,7 +91,12 @@ public class PlayerMovement : MonoBehaviour
 
     private void CheckGrounded()
     {
-        _isGrounded = Physics2D.BoxCast(_groundCheckPoint.position, _groundCheckSize, 0f, Vector2.down, _groundCheckDistance, _groundLayer);
+        _isGrounded = Physics2D.BoxCast(_groundCheckPoint.position,
+                                        _groundCheckSize,
+                                        0f,
+                                        Vector2.down,
+                                        _groundCheckDistance,
+                                        _groundLayer);
     }
 
 
@@ -136,10 +147,37 @@ public class PlayerMovement : MonoBehaviour
 
     }
 
+#if UNITY_EDITOR
     private void OnDrawGizmosSelected()
     {
+        if (!_toggleGizmos) return;
+
+        var velocity = Vector3.up * _verticalVelocity;
+
+        GizmosUtils.DrawWireArrow(
+            transform.position,
+            _offset,
+            velocity,
+            _arrowWidth,
+            _arrowHeight,
+            _lineThickness,
+            _verticalArrowColor);
+
+        GizmosUtils.DrawWireArrow(
+            transform.position,
+            _offset,
+            Vector3.right * _horizontalVelocity,
+            _arrowWidth,
+            _arrowHeight,
+            _lineThickness,
+            _horizontalArrowColor);
+
         if (_groundCheckPoint == null) return;
+
         Gizmos.color = Color.green;
-        Gizmos.DrawWireCube(_groundCheckPoint.position, _groundCheckSize);
+        Gizmos.DrawWireCube(
+            _groundCheckPoint.position,
+            _groundCheckSize);
     }
+#endif
 }
