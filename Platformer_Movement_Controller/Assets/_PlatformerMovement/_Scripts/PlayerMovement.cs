@@ -43,6 +43,19 @@ public class PlayerMovement : MonoBehaviour
     private float _jumpBufferTimer;
     private float _coyoteTimer;
     private bool _wasGrounded; // ground flag fors previous frame
+    private bool _wasFacingRight;
+
+    public bool IsRunning
+    {
+        get
+        {
+           return IsGrounded() && Mathf.Abs(_horizontalVelocity) > MOVEMENT_THRESHOLD;
+        }
+    }
+
+    public event Action<bool> OnTurn; // true means facing right
+    public event Action OnLand;
+    public event Action OnJump;
 
     private void Awake()
     {
@@ -80,6 +93,12 @@ public class PlayerMovement : MonoBehaviour
     {
         _input.OnJumpPerformed -= HandleJumpPerformed;
         _input.OnJumpCanceled -= HandleJumpCanceled;
+    }
+
+    private void Start()
+    {
+        _wasFacingRight = _input.MoveInput.x >= 0f;
+        OnTurn?.Invoke(_wasFacingRight);
     }
 
 #if UNITY_EDITOR
@@ -123,6 +142,17 @@ public class PlayerMovement : MonoBehaviour
 
         // Mathf.MoveTowards uses constant speedchange
         _horizontalVelocity = Mathf.MoveTowards(_horizontalVelocity, targetSpeed, speedChange * Time.fixedDeltaTime);
+
+        if (Mathf.Abs(_input.MoveInput.x) > MOVEMENT_THRESHOLD)
+        {
+            bool facingRight = _input.MoveInput.x > 0f;
+
+            if (facingRight != _wasFacingRight)
+            {
+                _wasFacingRight = facingRight;
+                OnTurn?.Invoke(facingRight);
+            }
+        }
     }
 
     private bool IsGrounded()
@@ -133,6 +163,17 @@ public class PlayerMovement : MonoBehaviour
             0f,
             Vector2.down,
             _groundCheckDistance,
+            _groundLayer);
+    }
+
+    private bool HitCeiling()
+    {
+        return Physics2D.BoxCast(
+            _ceilingCheckPoint.position,
+            _ceilingCheckSize,
+            0f,
+            Vector2.up,
+            _ceilingCheckDistance,
             _groundLayer);
     }
 
@@ -155,6 +196,12 @@ public class PlayerMovement : MonoBehaviour
 
     private void HandleJump()
     {
+        // previous frame was airborne, current frame is grounded
+        if (!_wasGrounded && IsGrounded())
+        {
+            OnLand?.Invoke();
+        }
+
         // Jump Input Buffer
         if (!IsGrounded())
         {
@@ -201,6 +248,8 @@ public class PlayerMovement : MonoBehaviour
         _verticalVelocity = _initialJumpVelocity;
 
         ResetJumpBuffer();
+
+        OnJump?.Invoke();
     }
     #endregion
 
@@ -216,17 +265,6 @@ public class PlayerMovement : MonoBehaviour
             _verticalVelocity = 0;
 
         _verticalVelocity += _gravity * Time.fixedDeltaTime;
-    }
-
-    private bool HitCeiling()
-    {
-        return Physics2D.BoxCast(
-            _ceilingCheckPoint.position,
-            _ceilingCheckSize,
-            0f,
-            Vector2.up,
-            _ceilingCheckDistance,
-            _groundLayer);
     }
 
     private void ApplyMovement()
@@ -265,7 +303,7 @@ public class PlayerMovement : MonoBehaviour
         Gizmos.DrawWireCube(
             _groundCheckPoint.position,
             _groundCheckSize);
-        
+
         Gizmos.color = Color.green;
         Gizmos.DrawWireCube(
             _ceilingCheckPoint.position,

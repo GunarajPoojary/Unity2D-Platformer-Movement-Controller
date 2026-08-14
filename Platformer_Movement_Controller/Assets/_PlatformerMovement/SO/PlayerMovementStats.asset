@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   <MaxSpeed>k__BackingField: 10
   <GravityMuliplier>k__BackingField: 1.2
-  <TurnSpeed>k__BackingField: 80
+  <TurnSpeed>k__BackingField: 43.2
   <GroundAcceleration>k__BackingField: 52
   <GroundDecceleration>k__BackingField: 52
   AirAcceleration: 53.3
@@ -22,6 +22,6 @@ MonoBehaviour:
   <JumpHeight>k__BackingField: 4
   <TimeTillJumpApex>k__BackingField: 0.4
   <JumpCutMultiplier>k__BackingField: 0.5
-  <JumpBufferTime>k__BackingField: 0.182
+  <JumpBufferTime>k__BackingField: 0.164
   <GroundedVerticalVelocity>k__BackingField: 0.1
-  <CoyoteTime>k__BackingField: 0.137
+  <CoyoteTime>k__BackingField: 0.2
