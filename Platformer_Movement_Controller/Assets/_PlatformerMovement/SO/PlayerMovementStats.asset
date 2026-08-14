@@ -22,5 +22,6 @@ MonoBehaviour:
   <JumpHeight>k__BackingField: 4
   <TimeTillJumpApex>k__BackingField: 0.4
   <JumpCutMultiplier>k__BackingField: 0.5
-  <JumpBufferTime>k__BackingField: 0.205
+  <JumpBufferTime>k__BackingField: 0.182
   <GroundedVerticalVelocity>k__BackingField: 0.1
+  <CoyoteTime>k__BackingField: 0.137

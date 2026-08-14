@@ -7,12 +7,17 @@ public class PlayerMovement : MonoBehaviour
 {
     private const float MOVEMENT_THRESHOLD = 0.01f;
     [SerializeField] private PlayerMovementDataSO _movementStats;
-    [SerializeField] private float _groundCheckDistance;
 
     [Header("Ground Check")]
     [SerializeField] private Transform _groundCheckPoint;
     [SerializeField] private Vector2 _groundCheckSize = new Vector2(0.5f, 0.1f);
+    [SerializeField] private float _groundCheckDistance;
     [SerializeField] private LayerMask _groundLayer;
+
+    [Header("Ceiling")]
+    [SerializeField] private Transform _ceilingCheckPoint;
+    [SerializeField] private Vector2 _ceilingCheckSize = new Vector2(0.5f, 0.1f);
+    [SerializeField] private float _ceilingCheckDistance;
 
 #if UNITY_EDITOR
     [Header("Debugging")]
@@ -33,11 +38,11 @@ public class PlayerMovement : MonoBehaviour
     private float _gravity;
     private float _initialJumpVelocity; // velocity required to reach jump apex
     private PlayerInput _input;
-    // private int _jumpsRemaining;
-    private bool _isGrounded;
     private float _verticalVelocity;
-    private float _jumpBufferCounter;
     private float _horizontalVelocity;
+    private float _jumpBufferTimer;
+    private float _coyoteTimer;
+    private bool _wasGrounded; // ground flag fors previous frame
 
     private void Awake()
     {
@@ -89,52 +94,13 @@ public class PlayerMovement : MonoBehaviour
 
     private void FixedUpdate()
     {
-        CheckGrounded();
+        HandleJump();
         ApplyGravity();
-        JumpInputBuffer();
+
         HandleMovement();
+
         ApplyMovement();
     }
-
-    private void JumpInputBuffer()
-    {
-        // Jump input pressed countdown each frame
-        _jumpBufferCounter -= Time.fixedDeltaTime;
-
-        // Perform jump if the countdown/buffer counter hasn't reached zero and player hit the ground 
-        if (_isGrounded && _jumpBufferCounter > 0f)
-        {
-            ExecuteJump();
-            _jumpBufferCounter = 0f;
-        }
-    }
-
-    private void ExecuteJump()
-    {
-        _verticalVelocity = _initialJumpVelocity;
-        // _jumpsRemaining++;
-    }
-
-    private void CheckGrounded()
-    {
-        // bool wasGrounded = _isGrounded;
-
-        _isGrounded = Physics2D.BoxCast(
-            _groundCheckPoint.position,
-            _groundCheckSize,
-            0f,
-            Vector2.down,
-            _groundCheckDistance,
-            _groundLayer);
-
-        // Reset jumps when we land
-        // if (_isGrounded && !wasGrounded)
-        // {
-        //     _jumpsRemaining = 0;
-        // }
-    }
-
-
 
     private void HandleMovement()
     {
@@ -148,56 +114,124 @@ public class PlayerMovement : MonoBehaviour
             if (Mathf.Sign(targetSpeed) != Mathf.Sign(_horizontalVelocity))
                 speedChange = _movementStats.TurnSpeed;
             else
-                speedChange = _isGrounded ? _movementStats.GroundAcceleration : _movementStats.AirAcceleration;
+                speedChange = IsGrounded() ? _movementStats.GroundAcceleration : _movementStats.AirAcceleration;
         }
         else
         {
-            speedChange = _isGrounded ? _movementStats.GroundDecceleration : _movementStats.AirDeceleration;
+            speedChange = IsGrounded() ? _movementStats.GroundDecceleration : _movementStats.AirDeceleration;
         }
 
         // Mathf.MoveTowards uses constant speedchange
         _horizontalVelocity = Mathf.MoveTowards(_horizontalVelocity, targetSpeed, speedChange * Time.fixedDeltaTime);
     }
 
-    private void ApplyMovement()
+    private bool IsGrounded()
     {
-        _rb.linearVelocity = new Vector2(_horizontalVelocity, _verticalVelocity);
+        return Physics2D.BoxCast(
+            _groundCheckPoint.position,
+            _groundCheckSize,
+            0f,
+            Vector2.down,
+            _groundCheckDistance,
+            _groundLayer);
     }
 
+
+    #region Jump
     private void HandleJumpPerformed()
     {
-        _jumpBufferCounter = _movementStats.JumpBufferTime;
-    }
-
-    private void ExecuteAirJump()
-    {
-        if (!_isGrounded && CanAirJump())
-            ExecuteJump();
-    }
-
-    private bool CanAirJump()
-    {
-        // 
-        return false;
+        // restart timer
+        _jumpBufferTimer = _movementStats.JumpBufferTime;
     }
 
     private void HandleJumpCanceled()
     {
-        if (_rb.linearVelocityY > 0)
+        // Variable jump height
+        if (_verticalVelocity > 0f)
         {
             _verticalVelocity *= _movementStats.JumpCutMultiplier;
         }
     }
 
+    private void HandleJump()
+    {
+        // Jump Input Buffer
+        if (!IsGrounded())
+        {
+            _jumpBufferTimer -= Time.fixedDeltaTime;
+        }
+        else if (_jumpBufferTimer > 0)
+        {
+            ExecuteJump();
+            return;
+        }
+
+        // Coyote Time
+        // check for player walking off edge
+        if (_wasGrounded && !IsGrounded())
+        {
+            Debug.Log("Walked Off edge or airborne");
+
+            // restart timer
+            _coyoteTimer = _movementStats.CoyoteTime;
+        }
+
+        // countdown timer
+        if (!IsGrounded())
+        {
+            _coyoteTimer -= Time.fixedDeltaTime;
+
+            if (_coyoteTimer > 0 && _jumpBufferTimer > 0) // _jumpBufferTimer > 0 means jump pressed 
+                                                          // or use _jumpPressed flag
+            {
+                ExecuteJump();
+            }
+        }
+
+        _wasGrounded = IsGrounded();
+    }
+
+    private void ResetJumpBuffer()
+    {
+        _jumpBufferTimer = 0; // Set the value to zero not max buffer time otherwise player will keep jumping
+    }
+
+    private void ExecuteJump()
+    {
+        _verticalVelocity = _initialJumpVelocity;
+
+        ResetJumpBuffer();
+    }
+    #endregion
+
     private void ApplyGravity()
     {
-        if (_isGrounded)
+        if (IsGrounded() && _verticalVelocity <= 0f)
         {
             _verticalVelocity = -_movementStats.GroundedVerticalVelocity;
             return;
         }
 
+        if (HitCeiling())
+            _verticalVelocity = 0;
+
         _verticalVelocity += _gravity * Time.fixedDeltaTime;
+    }
+
+    private bool HitCeiling()
+    {
+        return Physics2D.BoxCast(
+            _ceilingCheckPoint.position,
+            _ceilingCheckSize,
+            0f,
+            Vector2.up,
+            _ceilingCheckDistance,
+            _groundLayer);
+    }
+
+    private void ApplyMovement()
+    {
+        _rb.linearVelocity = new Vector2(_horizontalVelocity, _verticalVelocity);
     }
 
 #if UNITY_EDITOR
@@ -231,6 +265,11 @@ public class PlayerMovement : MonoBehaviour
         Gizmos.DrawWireCube(
             _groundCheckPoint.position,
             _groundCheckSize);
+        
+        Gizmos.color = Color.green;
+        Gizmos.DrawWireCube(
+            _ceilingCheckPoint.position,
+            _ceilingCheckSize);
     }
 #endif
 }
