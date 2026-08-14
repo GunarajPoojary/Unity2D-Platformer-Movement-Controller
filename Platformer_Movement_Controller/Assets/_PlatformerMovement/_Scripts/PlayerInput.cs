@@ -13,8 +13,8 @@ public class PlayerInput : MonoBehaviour
         }
     }
 
-    public Action OnJumpPerformed;
-    public Action OnJumpCanceled;
+    public event Action OnJumpPerformed;
+    public event Action OnJumpCanceled;
 
     private void Update()
     {
